@@ -22,13 +22,14 @@ curl 'localhost:8288/sql?q=SELECT * FROM indexers ORDER BY CAST(rewards AS HUGEI
 The nest is self-contained: the three ABIs are vendored under `abis/` (frozen, so the decode
 registry hash is stable) and nothing is resolved at consume time.
 
-### Start blocks (set these for full history)
+### Start blocks & archive RPC
 
-The vendored `nuthatch.toml` ships **without** per-contract `start_block`s, so out of the box `dev`
-backfills from a tip offset (`--backfill N`) — fine for a recent-activity dashboard. For **full
-history from deployment**, set each contract's `start_block` in `nuthatch.toml`. Reliable deploy-block
-detection needs an **archive** Arbitrum RPC (public sequencer/non-archive endpoints don't serve
-historical `eth_getCode`); point `nuthatch` at one and re-run `init`, or fill them in by hand.
+Each contract's deployment block is vendored in `nuthatch.toml` (`staking` 42449585, `extension`
+180370540, `service` 397492865), so `dev` backfills **full history from deployment** by default. That
+requires an **archive** Arbitrum RPC — the public keyless endpoints in `nuthatch.toml` serve the tip
+fine but not historical `eth_getLogs` over that range. Swap in your own archive endpoint (edit
+`rpc_urls`) for a real backfill. To index only recent activity instead, clear the `start_block`s and
+run `dev --backfill N`.
 
 ## Contracts (Arbitrum One)
 

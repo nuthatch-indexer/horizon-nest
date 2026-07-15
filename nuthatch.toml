@@ -13,14 +13,17 @@ schema_version = 1
 [[contracts]]
 alias = "staking"
 address = "0x00669a4cf01450b64e8a2a20e9b1fcb71e61ef03"
+start_block = 42449585
 abi = "abis/staking.json"
 
 [[contracts]]
 alias = "service"
 address = "0xb2bb92d0de618878e438b55d5846cfecd9301105"
+start_block = 397492865
 abi = "abis/service.json"
 
 [[contracts]]
 alias = "extension"
 address = "0x3be385576d7c282070ad91bf94366de9f9ba3571"
+start_block = 180370540
 abi = "abis/extension.json"
