@@ -1,0 +1,92 @@
+# Semantic layer for the horizon nest — human/agent-facing meaning for the raw event tables and the
+# authored views, surfaced through `/schema` and the MCP `schema` tool (RFC-0016 + RFC-0018 §1).
+# Edit descriptions freely. The `[table.*.footguns]` are DERIVED from the ABI — leave them be.
+
+[nest]
+description = """
+The Graph's Horizon staking system on Arbitrum One: indexers, operators, allocations, delegations,
+indexing rewards and query fees, from the HorizonStaking core, the SubgraphService, and the
+delegation extension. Mirrors the community horizon-indexer subgraph's entity model over nuthatch's
+SQL surface. The authored views below are the intended query surface; the raw `*__*` event tables are
+the ground truth they fold.
+"""
+
+# --- The authored views: the query surface an analyst or dashboard actually uses ------------------
+
+[view.operators]
+description = """
+Current operator authorisations: the live `allowed` state per (serviceProvider, verifier, operator),
+latest-event-wins by (block_number, log_index). Only currently-authorised operators are kept.
+"""
+
+[view.allocation_events]
+description = """
+The shared spine the allocation-derived views fold: one normalised row per Created / Resized / Closed
+event with (allocationId, indexer, tokens, status). Reused by `allocations`, `indexers`, and `global`
+so they agree by construction.
+"""
+
+[view.allocations]
+description = """
+Current state per allocation, folding Created / Resized / Closed into one row (latest event wins).
+Token amounts use the `*_dec` DECIMAL(38) columns so they sum and compare as numbers. `status` is
+`active` or `closed`.
+"""
+
+[view.delegations]
+description = """
+Net delegated stake per (indexer, delegator) = Σ(delegated) − Σ(withdrawn) in GRT base units.
+`StakeDelegatedLocked` (the thawing step, not a balance change) is excluded; rows that net to zero are
+dropped, matching a "currently delegating" set.
+"""
+
+[view.delegators_active]
+description = "The currently-delegating (indexer, delegator) pairs — `delegations` with a positive net balance."
+
+[view.indexer_rewards]
+description = "Per-indexer lifetime indexing rewards, summed from `IndexingRewardsCollected` (uint256 → `*_dec`)."
+
+[view.indexer_query_fees]
+description = "Per-indexer lifetime query fees, summed from `QueryFeesCollected` (uint256 → `*_dec`)."
+
+[view.indexers]
+description = """
+Per-indexer totals: lifetime indexing rewards, query fees, and active-allocation count. Rewards and
+fees come from the collection-event sums; the active count from the folded `allocations` view. Left
+joins, so an indexer with rewards but no open allocation (or vice-versa) still appears.
+"""
+
+[view.rewards_daily]
+description = "Daily indexing-reward totals, bucketed by `date_trunc('day', block_timestamp)` — the shape a dashboard panel consumes."
+
+[view.rewards_hourly]
+description = "Hourly indexing-reward totals — the finer-grained sibling of `rewards_daily`."
+
+[view.query_fees_daily]
+description = "Daily query-fee totals, bucketed by day."
+
+[view.global]
+description = """
+One-row network totals over the derived views: active allocations, total indexing rewards, total query
+fees, distinct indexers and delegators. The single-row summary a header panel reads.
+"""
+
+# --- Key raw event tables (the ground truth the views fold) ---------------------------------------
+
+[table.service__indexing_rewards_collected]
+description = "SubgraphService `IndexingRewardsCollected`: an indexer's rewards for an allocation. Summed into `indexer_rewards`."
+
+[table.service__query_fees_collected]
+description = "SubgraphService `QueryFeesCollected`: query fees collected for an indexer. Summed into `indexer_query_fees`."
+
+[table.service__allocation_created]
+description = "SubgraphService `AllocationCreated`: an indexer opens an allocation of stake against a subgraph deployment."
+
+[table.service__allocation_closed]
+description = "SubgraphService `AllocationClosed`: an allocation is closed. Folds into `allocations` (status → closed)."
+
+[table.extension__stake_delegated]
+description = "Delegation extension `StakeDelegated`: a delegator adds stake to an indexer. The positive leg of `delegations`."
+
+[table.extension__stake_delegated_withdrawn]
+description = "Delegation extension `StakeDelegatedWithdrawn`: a delegator withdraws delegated stake. The negative leg of `delegations`."
