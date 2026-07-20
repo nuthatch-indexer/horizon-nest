@@ -5,7 +5,7 @@ staking activity on **Arbitrum One** — operators, allocations, delegations, pe
 daily/hourly aggregations — from three contracts, with a parity check against the community subgraph
 it mirrors.
 
-> Credit: the entity model mirrors **Paul Barba (PaulieB14)**'s
+> Credit: the entity model mirrors PaulieB14's
 > [horizon-indexer-subgraph](https://github.com/PaulieB14). This nest reproduces its semantics over
 > nuthatch's SQL surface; where behaviour is genuinely ambiguous, the chosen semantics are documented
 > here rather than silently matching a bug.
