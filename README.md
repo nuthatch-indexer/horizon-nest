@@ -56,6 +56,11 @@ entities below are DuckDB views over those tables.
 Token amounts use nuthatch's derived `*_dec` DECIMAL columns, so they sum and compare as numbers
 (base units, i.e. GRT × 10¹⁸).
 
+Each view's meaning — and the footguns above — are declared in `semantic.toml`, so they surface through
+nuthatch's `/schema` endpoint and the MCP `schema` tool: a coding agent gets the intent of every view,
+not just its columns. This nest is nuthatch's reference for the authored semantic layer (RFC-0018 §1) —
+a nest with a brain, in plain `nuthatch.toml` + SQL views, no bespoke authoring language.
+
 ## Freshness (honest tradeoff)
 
 Derived views read **sealed (finalized) data**, so entities lag the tip by the finality window
